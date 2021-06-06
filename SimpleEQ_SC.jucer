@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="KDsqdq" name="SimpleEQ_SC" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              cppLanguageStandard="17">
   <MAINGROUP id="nExrWu" name="SimpleEQ_SC">
     <GROUP id="{3D27702F-2787-F11F-7F37-896817077B70}" name="Source">
       <FILE id="pOfJC8" name="PluginProcessor.cpp" compile="1" resource="0"
