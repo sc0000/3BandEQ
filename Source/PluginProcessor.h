@@ -89,11 +89,11 @@ private:
     using Coefficients = Filter::CoefficientsPtr;
     static void updateCoefficients(Coefficients& oldCo, Coefficients& newCo);
 
-    template<Slope slope, typename ChainType, typename CoefficientType>
+    template<int Index, typename ChainType, typename CoefficientType>
     void update(ChainType& chain, const CoefficientType& coefficients)
     {
-        updateCoefficients(chain.template get<slope>().coefficients, coefficients[slope]);
-        chain.template setBypassed<slope>(false);
+        updateCoefficients(chain.template get<Index>().coefficients, coefficients[Index]);
+        chain.template setBypassed<Index>(false);
     }
 
     template<typename ChainType, typename CoefficientType>
@@ -109,14 +109,17 @@ private:
         case Slope_48:
         {
             update<Slope_48>(lowCut, cutCoefficients);
+            __fallthrough;
         }
         case Slope_36:
         {
             update<Slope_36>(lowCut, cutCoefficients);
+            __fallthrough;
         }
         case Slope_24:
         {
             update<Slope_24>(lowCut, cutCoefficients);
+            __fallthrough;
         }
         case Slope_12:
         {
@@ -125,6 +128,10 @@ private:
         }
         }
     }
+
+    void updateLowCutFilters(ChainSettings& chainSettings);
+    void updateHighCutFilters(ChainSettings& chainSettings);
+    void updateFilters();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQ_SCAudioProcessor)
