@@ -73,11 +73,8 @@ public:
 private:
 
     using Filter = juce::dsp::IIR::Filter<float>;
-
     using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
-
     using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
-
     MonoChain leftChain, rightChain;
 
     enum ChainPositions
@@ -86,6 +83,12 @@ private:
         Peak,
         HighCut
     };
+
+    void updatePeakFilter(const ChainSettings& chainSettings);
+
+    using Coefficients = Filter::CoefficientsPtr;
+    
+    static void updateCoefficients(Coefficients& oldCo, Coefficients& newCo);
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQ_SCAudioProcessor)
