@@ -176,9 +176,9 @@ bool SimpleEQ_SCAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleEQ_SCAudioProcessor::createEditor()
 {
-    //return new SimpleEQ_SCAudioProcessorEditor (*this);
+    return new SimpleEQ_SCAudioProcessorEditor (*this);
 
-    return new juce::GenericAudioProcessorEditor(*this);
+    // return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
