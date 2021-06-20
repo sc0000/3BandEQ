@@ -178,6 +178,8 @@ juce::AudioProcessorEditor* SimpleEQ_SCAudioProcessor::createEditor()
 {
     return new SimpleEQ_SCAudioProcessorEditor (*this);
 
+    // Use the following return for a working version using the generic GUI
+   
     // return new juce::GenericAudioProcessorEditor(*this);
 }
 

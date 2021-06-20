@@ -10,19 +10,27 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-SimpleEQ_SCAudioProcessorEditor::SimpleEQ_SCAudioProcessorEditor (SimpleEQ_SCAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+SimpleEQ_SCAudioProcessorEditor::SimpleEQ_SCAudioProcessorEditor(SimpleEQ_SCAudioProcessor& p)
+    : AudioProcessorEditor(&p), audioProcessor(p),
+    peakFreqSliderAttachment(audioProcessor.apvts, "Peak Freq", peakFreqSlider),
+    peakGainSliderAttachment(audioProcessor.apvts, "Peak Gain", peakGainSlider),
+    peakQSliderAttachment(audioProcessor.apvts, "Peak Q", peakQSlider),
+    lowCutSliderAttachment(audioProcessor.apvts, "LowCut Freq", lowCutSlider),
+    highCutSliderAttachment(audioProcessor.apvts, "HighCut Freq", highCutSlider),
+    lowCutSlopeSliderAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSlider),
+    highCutSlopeSliderAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSlider)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     
+    setSize(600, 400);
+
     std::vector<juce::Component*> components = getComponents();
     for (auto* component : components)
     {
         addAndMakeVisible(component);
     }
 
-    setSize(600, 400);
 }
 
 SimpleEQ_SCAudioProcessorEditor::~SimpleEQ_SCAudioProcessorEditor()
@@ -37,7 +45,7 @@ void SimpleEQ_SCAudioProcessorEditor::paint (juce::Graphics& g)
 
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    // g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
 void SimpleEQ_SCAudioProcessorEditor::resized()
