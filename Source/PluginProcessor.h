@@ -36,11 +36,66 @@ enum ChainPositions
 };
 
 using Coefficients = Filter::CoefficientsPtr;
+
+
+template<int Index, typename ChainType, typename CoefficientType>
+void update(ChainType& chain, const CoefficientType& coefficients)
+{
+    updateCoefficients(chain.template get<Index>().coefficients, coefficients[Index]);
+    chain.template setBypassed<Index>(false);
+}
+
+template<typename ChainType, typename CoefficientType>
+void updateCutFilter(ChainType& cutFilter, const CoefficientType& cutCoefficients, Slope& cutFilterSlope)
+{
+    cutFilter.template setBypassed<0>(true);
+    cutFilter.template setBypassed<1>(true);
+    cutFilter.template setBypassed<2>(true);
+    cutFilter.template setBypassed<3>(true);
+
+    switch (cutFilterSlope)
+    {
+    case Slope_48:
+    {
+        update<Slope_48>(cutFilter, cutCoefficients);
+        __fallthrough;
+    }
+    case Slope_36:
+    {
+        update<Slope_36>(cutFilter, cutCoefficients);
+        __fallthrough;
+    }
+    case Slope_24:
+    {
+        update<Slope_24>(cutFilter, cutCoefficients);
+        __fallthrough;
+    }
+    case Slope_12:
+    {
+        update<Slope_12>(cutFilter, cutCoefficients);
+        break;
+    }
+    }
+}
+
 void updateCoefficients(Coefficients& oldCo, Coefficients& newCo);
 
-Coefficients makePeakFilter(const ChainSettings chainSettings, double sampleRate);
+inline Coefficients makePeakFilter(const ChainSettings& chainSettings, double sampleRate)
+{
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.peakFreq,
+        chainSettings.peakQ, juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+}
 
-
+inline auto makeLowCutFilter(const ChainSettings& chainSettings, double sampleRate)
+{
+    return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq,
+       sampleRate, 2 * (chainSettings.lowCutSlope + 1));
+}
+inline auto makeHighCutFilter(const ChainSettings& chainSettings, double sampleRate)
+{
+    return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.highCutFreq,
+        sampleRate, 2 * (chainSettings.highCutSlope + 1));
+}
 
 //==============================================================================
 /**
@@ -86,54 +141,13 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
     juce::AudioProcessorValueTreeState apvts{ *this, nullptr, "Parameters", createParameterLayout() };
 
 private:
     MonoChain leftChain, rightChain;
 
     void updatePeakFilter(const ChainSettings& chainSettings);
-
-
-
-    template<int Index, typename ChainType, typename CoefficientType>
-    void update(ChainType& chain, const CoefficientType& coefficients)
-    {
-        updateCoefficients(chain.template get<Index>().coefficients, coefficients[Index]);
-        chain.template setBypassed<Index>(false);
-    }
-
-    template<typename ChainType, typename CoefficientType>
-    void updateCutFilter(ChainType& cutFilter, const CoefficientType& cutCoefficients, Slope& cutFilterSlope)
-    {
-        cutFilter.template setBypassed<0>(true);
-        cutFilter.template setBypassed<1>(true);
-        cutFilter.template setBypassed<2>(true);
-        cutFilter.template setBypassed<3>(true);
-
-        switch (cutFilterSlope)
-        {
-        case Slope_48:
-        {
-            update<Slope_48>(cutFilter, cutCoefficients);
-            __fallthrough;
-        }
-        case Slope_36:
-        {
-            update<Slope_36>(cutFilter, cutCoefficients);
-            __fallthrough;
-        }
-        case Slope_24:
-        {
-            update<Slope_24>(cutFilter, cutCoefficients);
-            __fallthrough;
-        }
-        case Slope_12:
-        {
-            update<Slope_12>(cutFilter, cutCoefficients);
-            break;
-        }
-        }
-    }
 
     void updateLowCutFilters(ChainSettings& chainSettings);
     void updateHighCutFilters(ChainSettings& chainSettings);

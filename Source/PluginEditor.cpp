@@ -25,16 +25,29 @@ SimpleEQ_SCAudioProcessorEditor::SimpleEQ_SCAudioProcessorEditor(SimpleEQ_SCAudi
     
     setSize(600, 400);
 
+    startTimerHz(60);
+
     std::vector<juce::Component*> components = getComponents();
     for (auto* component : components)
     {
         addAndMakeVisible(component);
     }
 
+    const auto& params = audioProcessor.getParameters();
+    for (auto* param : params)
+    {
+        param->addListener(this);
+    }
+
 }
 
 SimpleEQ_SCAudioProcessorEditor::~SimpleEQ_SCAudioProcessorEditor()
 {
+    const auto& params = audioProcessor.getParameters();
+    for (auto* param : params)
+    {
+        param->removeListener(this);
+    }
 }
 
 //==============================================================================
@@ -74,8 +87,8 @@ void SimpleEQ_SCAudioProcessorEditor::paint (juce::Graphics& g)
     }
 
     juce::Path responseCurve;
-    const double outputMin = responseArea.getBottom();
-    const double outputMax = responseArea.getY();
+    const double outputMin = responseArea.getBottom() - 10.f; // don't draw into frame
+    const double outputMax = responseArea.getY() + 10.f;
 
     auto map = [outputMin, outputMax](double input)
     {
@@ -129,6 +142,13 @@ void SimpleEQ_SCAudioProcessorEditor::timerCallback()
     if (parameterChanged.compareAndSetBool(false, true))
     {
         // update monoChain, repaint
+        auto chainSettings = getChainSettings(audioProcessor.apvts);
+        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
+        
+        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+
+        repaint();
+
     }
 }
 
