@@ -87,8 +87,8 @@ void SimpleEQ_SCAudioProcessorEditor::paint (juce::Graphics& g)
     }
 
     juce::Path responseCurve;
-    const double outputMin = responseArea.getBottom() - 10.f; // don't draw into frame
-    const double outputMax = responseArea.getY() + 10.f;
+    const double outputMin = double(responseArea.getBottom()) - 10.f; // don't draw into frame
+    const double outputMax = double(responseArea.getY()) + 10.f;
 
     auto map = [outputMin, outputMax](double input)
     {
@@ -141,11 +141,16 @@ void SimpleEQ_SCAudioProcessorEditor::timerCallback()
 {
     if (parameterChanged.compareAndSetBool(false, true))
     {
-        // update monoChain, repaint
         auto chainSettings = getChainSettings(audioProcessor.apvts);
+
         auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
-        
         updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+
+        auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCutFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
+
+        auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCutFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, chainSettings.highCutSlope);
 
         repaint();
 
